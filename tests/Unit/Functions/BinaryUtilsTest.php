@@ -7,18 +7,15 @@ use PHPUnit\Framework\TestCase;
 use  AgoraRoomService\Functions\BinaryUtils\{
     BinaryConfig,
     function packUint16,
-    function packUint32
-};
-
-use function AgoraRoomService\Functions\BinaryUtils\{
-    packInt16,
-    packMapUint32,
-    packString,
-    unPackInt16,
-    unPackMapUint32,
-    unPackString,
-    unPackUint16,
-    unPackUint32,
+    function packUint32,
+    function packInt16,
+    function packMapUint32,
+    function packString,
+    function unPackInt16,
+    function unPackMapUint32,
+    function unPackString,
+    function unPackUint16,
+    function unPackUint32,
 };
 
 class BinaryUtilsTest extends TestCase

@@ -19,7 +19,8 @@
     "minimum-stability": "dev",
     "autoload": {
         "files": [
-            "src/Functions/BinaryUtils.php"
+            "src/Functions/BinaryUtils.php",
+            "src/Functions/Base64Utils.php"
         ],
         "classmap": [
             "src/"

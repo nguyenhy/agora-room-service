@@ -38,7 +38,7 @@
     },
     "scripts": {
         "test": [
-            "./vendor/bin/phpunit tests --testdox"
+            "./vendor/bin/phpunit --testdox"
         ]
     },
     "require": {

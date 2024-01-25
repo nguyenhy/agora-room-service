@@ -4,7 +4,7 @@ namespace AgoraRoomServiceTests\Unit\Functions;
 
 use PHPUnit\Framework\TestCase;
 
-use  AgoraRoomService\Functions\BinaryUtils\{
+use  Hyn\AgoraRoomService\Functions\BinaryUtils\{
     BinaryConfig,
     function packUint16,
     function packUint32,

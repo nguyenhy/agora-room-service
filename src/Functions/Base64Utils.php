@@ -1,6 +1,6 @@
 <?php
 
-namespace AgoraRoomService\Functions\Base64Utils;
+namespace Hyn\AgoraRoomService\Functions\Base64Utils;
 
 function base64EncodeStr($src)
 {

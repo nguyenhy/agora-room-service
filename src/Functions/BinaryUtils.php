@@ -1,6 +1,6 @@
 <?php
 
-namespace AgoraRoomService\Functions\BinaryUtils;
+namespace Hyn\AgoraRoomService\Functions\BinaryUtils;
 
 class BinaryConfig
 {

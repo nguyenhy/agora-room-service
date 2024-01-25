@@ -4,7 +4,7 @@ namespace AgoraRoomServiceTests\Unit\Functions;
 
 use PHPUnit\Framework\TestCase;
 
-use function AgoraRoomService\Functions\Base64Utils\{
+use function Hyn\AgoraRoomService\Functions\Base64Utils\{
     base64EncodeStr,
     base64DecodeStr
 };

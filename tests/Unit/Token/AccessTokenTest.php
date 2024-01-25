@@ -2,12 +2,11 @@
 
 namespace AgoraRoomServiceTests\Unit;
 
-use Hyn\AgoraRoomService\Service;
 use Hyn\AgoraRoomService\Token\AccessToken;
 use PHPUnit\Framework\TestCase;
 
 
-class ServiceTest extends TestCase
+class AccessTokenTest extends TestCase
 {
     const DataMockAccount        = "^ZSgT<%q:Fj*@`92>#OHL?\"hkm~nGYiP";
     const DataMockAppCertificate = "5CFd2fd1755d40ecb72977518be15d3b";

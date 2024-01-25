@@ -20,7 +20,9 @@
     "autoload": {
         "files": [
             "src/Functions/BinaryUtils.php",
-            "src/Functions/Base64Utils.php"
+            "src/Functions/Base64Utils.php",
+            "src/Functions/UidUtils.php",
+            "src/Functions/CompressUtils.php"
         ],
         "classmap": [
             "src/"

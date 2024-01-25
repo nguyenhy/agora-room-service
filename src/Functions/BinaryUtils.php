@@ -68,7 +68,12 @@ function unPackString($stream)
         return false;
     }
 
-    $length = (int) bin2hex($bytes_from_start);
+    $unpacked_bytes = unPackInt16($bytes_from_start);
+    if ($unpacked_bytes === false || !isset($unpacked_bytes[1])) {
+        return false;
+    }
+
+    $length = (int) $unpacked_bytes[1];
     if (!($length > 0)) {
         return false;
     }

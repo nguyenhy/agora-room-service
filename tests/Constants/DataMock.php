@@ -1,6 +1,6 @@
 <?php
 
-namespace AgoraRoomServiceTests\Constants;
+namespace Hyn\AgoraRoomServiceTests\Constants;
 
 class DataMock
 {

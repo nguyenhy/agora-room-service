@@ -1,6 +1,6 @@
 <?php
 
-namespace AgoraRoomServiceTests\Unit\Functions;
+namespace Hyn\AgoraRoomServiceTests\Unit\Functions;
 
 use PHPUnit\Framework\TestCase;
 

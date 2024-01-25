@@ -7,7 +7,7 @@ use Hyn\AgoraRoomService\Token\AccessToken;
 use PHPUnit\Framework\TestCase;
 
 
-class AccessTokenTest extends TestCase
+class TokenBuilderServiceTest extends TestCase
 {
 
 

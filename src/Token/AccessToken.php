@@ -5,6 +5,8 @@ namespace Hyn\AgoraRoomService\Token;
 use Hyn\AgoraRoomService\Functions\BinaryUtils\BinaryConfig;
 use Hyn\AgoraRoomService\Services\PackableServiceInterface;
 use Exception;
+use Hyn\AgoraRoomService\Services\Service;
+use Hyn\AgoraRoomService\Services\ServiceRtc;
 
 use function Hyn\AgoraRoomService\Functions\Base64Utils\base64DecodeStr;
 use function Hyn\AgoraRoomService\Functions\Base64Utils\base64EncodeStr;
@@ -330,6 +332,7 @@ class AccessToken
         }
         $this->Salt = (int) $unpackedSalt[1];
 
+
         // var serviceNum uint16
         // if serviceNum, err = unPackUint16(buffer); err != nil {
         // 	return
@@ -348,31 +351,56 @@ class AccessToken
         // var serviceType uint16
         // for i := 0; i < int(serviceNum); i++ {
         for ($i = 0; $i < $serviceNum; $i++) {
+            /**
+             * ```go
+             * if serviceType, err = unPackUint16(buffer); err != nil {         (1)
+             *     return
+             * }
+             * service := accessToken.newService(serviceType)
+             * if err = service.UnPack(buffer); err != nil {
+             *     return
+             * }
+             * accessToken.Services[serviceType] = service
+             * ```
+             * - get `serviceType`
+             * - then call `accessToken.newService(serviceType)` to get expected service
+             * - call `service.UnPack(buffer)` to unpack the `Privileges` only
+             * - set value to `accessToken.Services` with key is `serviceType` and value is `service`
+             * 
+             * but in this php implementation, we'll do it a little differently:
+             * - `Pack` and `UnPack` method of `Hyn\AgoraRoomService\Services\Service`
+             * will always pack/unpack `Type` and `Privileges` (golang version pack `Type` and `Privileges` and unpack `Privileges` only)
+             * - Since the order of bytes sequence is always `Type->Privileges->ChannelName->Uid`, we will first
+             *    - call `UnPack` method of `Hyn\AgoraRoomService\Services` to unpack `Type->Privileges`
+             *    - base on the `Type` we will create a new service of `ServiceRtc`, `ServiceRtm`, ....
+             */
 
-            // 	if serviceType, err = unPackUint16(buffer); err != nil {
-            // 		return
-            // 	}
-            $bytesServiceType  = fread($buffer, BinaryConfig::INT16_BYTES_LENGTH);
-            if ($bytesServiceType === false) {
-                throw new Exception("AccessToken.bytesServiceType", 1);
-            }
-
-            $unpackedServiceType = unPackUint16($bytesServiceType);
-            if ($unpackedServiceType === false || !isset($unpackedServiceType[1])) {
-                throw new Exception("AccessToken.unpackedServiceType", 1);
-            }
-            $serviceType = (int) $unpackedServiceType[1];
-
-            // service := accessToken.newService(serviceType)
-            $service = $this->newService($serviceType);
-
-            // 	if err = service->UnPack(buffer); err != nil {
-            // 		return
-            // 	}
+            $service = Service::NewService(-1);
             $service->UnPack($buffer);
+            $serviceType = $service->Type;
 
-            // accessToken.Services[serviceType] = service
-            $this->Services[$serviceType] = $service;
+            switch ($serviceType) {
+                case self::ServiceTypeRtc:
+                    $ChannelName = unPackString($buffer);
+                    $Uid = unPackString($buffer);
+                    $rtcService = new ServiceRtc($ChannelName, $Uid, $service);
+                    $this->Services[$serviceType] = $rtcService;
+                    break;
+                case self::ServiceTypeRtm:
+                    // return self::NewServiceRtm("");
+                    break;
+                case self::ServiceTypeFpa:
+                    // return self::NewServiceFpa();
+                    break;
+                case self::ServiceTypeChat:
+                    // return self::NewServiceChat("");
+                    break;
+                case self::ServiceTypeEducation:
+                    // return self::NewServiceEducation("", "", -1);
+                    break;
+                default:
+                    break;
+            }
         }
         // }
 
@@ -451,23 +479,5 @@ class AccessToken
         fclose($bufSalt);
 
         return hex2bin($hSalt);
-    }
-
-    function newService(int $serviceType): PackableServiceInterface
-    {
-        switch ($serviceType) {
-            case self::ServiceTypeRtc:
-                // return self::NewServiceRtc("", "");
-            case self::ServiceTypeRtm:
-                // return self::NewServiceRtm("");
-            case self::ServiceTypeFpa:
-                // return self::NewServiceFpa();
-            case self::ServiceTypeChat:
-                // return self::NewServiceChat("");
-            case self::ServiceTypeEducation:
-                // return self::NewServiceEducation("", "", -1);
-            default:
-                throw new Exception("AccessToken.new service failed: unknown service type `$serviceType`");
-        }
     }
 }

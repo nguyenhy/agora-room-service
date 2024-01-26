@@ -2,7 +2,7 @@
 
 namespace Hyn\AgoraRoomService\Functions\UidUtils;
 
-function GetUidStr($uid)
+function GetUidStr(int $uid)
 {
     if ($uid === 0) {
         return "";

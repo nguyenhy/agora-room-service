@@ -11,6 +11,12 @@
     "prefer-stable": true,
     "minimum-stability": "dev",
     "license": "MIT",
+    "authors": [
+        {
+            "name": "nguyenhy",
+            "email": "nguyenhy311@gmail.com"
+        }
+    ],
     "autoload": {
         "files": [
             "src/Functions/BinaryUtils.php",

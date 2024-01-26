@@ -135,6 +135,10 @@ function unPackMapUint32($stream)
     }
 
     $length = (int) $unpacked_length[1];
+    if ($length === 0) {
+        return [];
+    }
+
     if (!($length > 0)) {
         return null;
     }

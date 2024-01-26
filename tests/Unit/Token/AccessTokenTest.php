@@ -1,6 +1,6 @@
 <?php
 
-namespace Hyn\AgoraRoomServiceTests\Unit;
+namespace Hyn\AgoraRoomServiceTests\Unit\Token;
 
 use Hyn\AgoraRoomServiceTests\Constants\DataMock;
 use Hyn\AgoraRoomService\Token\AccessToken;

@@ -2,6 +2,7 @@
 
 namespace Hyn\AgoraRoomServiceTests\Unit\Token;
 
+use Exception;
 use Hyn\AgoraRoomService\Services\ServiceRtc;
 use Hyn\AgoraRoomServiceTests\Constants\DataMock;
 use Hyn\AgoraRoomService\Token\AccessToken;
@@ -13,6 +14,50 @@ class AccessTokenTest extends TestCase
 {
 
 
+    public function test_create_instance_CreateAccessToken()
+    {
+        $accessToken = AccessToken::CreateAccessToken(DataMock::AppId, DataMock::AppCertificate, DataMock::Expire);
+        $this->assertEquals($accessToken->AppId, DataMock::AppId);
+        $this->assertEquals($accessToken->AppCert, DataMock::AppCertificate);
+        $this->assertEquals($accessToken->Expire, DataMock::Expire);
+
+        $accessToken = AccessToken::CreateAccessToken();
+        $this->assertEquals($accessToken->AppId, '');
+        $this->assertEquals($accessToken->AppCert, '');
+        $this->assertEquals($accessToken->Expire, 900);
+    }
+
+    public function test_create_instance_NewAccessToken()
+    {
+        $accessToken = AccessToken::NewAccessToken(DataMock::AppId, DataMock::AppCertificate, DataMock::Expire);
+        $this->assertEquals($accessToken->AppId, DataMock::AppId);
+        $this->assertEquals($accessToken->AppCert, DataMock::AppCertificate);
+        $this->assertEquals($accessToken->Expire, DataMock::Expire);
+    }
+
+    public function test_isUuid()
+    {
+        $this->assertEquals(AccessToken::isUuid(DataMock::AppId), true);
+        $this->assertEquals(AccessToken::isUuid(DataMock::AppCertificate), true);
+        $this->assertEquals(AccessToken::isUuid("590f3e8a-bc22-11ee-a506-0242ac120002"), false);
+        $this->assertEquals(AccessToken::isUuid(""), false);
+    }
+
+
+    public function test_build_fail()
+    {
+        $accessToken = new AccessToken('DataMock::AppCertificate', 'DataMock::AppId', DataMock::Expire, DataMock::IssueTs, DataMock::Salt, []);
+        $this->expectException(Exception::class);
+        $accessToken->Build();
+    }
+
+    public function test_build_fail2()
+    {
+        $accessToken = new AccessToken('DataMock::AppCertificate', DataMock::AppId, DataMock::Expire, DataMock::IssueTs, DataMock::Salt, []);
+        $this->expectException(Exception::class);
+        $accessToken->Build();
+    }
+
     public function test_build_parse()
     {
 
@@ -22,7 +67,6 @@ class AccessTokenTest extends TestCase
 
         $accessToken->Parse($token);
 
-        $this->assertEquals($accessToken->AppId, DataMock::AppId);
         $this->assertEquals($accessToken->AppId, DataMock::AppId);
         $this->assertEquals($accessToken->Expire, DataMock::Expire);
         $this->assertEmpty($accessToken->Services);

@@ -4,6 +4,7 @@ namespace Hyn\AgoraRoomServiceTests\Unit;
 
 use Hyn\AgoraRoomServiceTests\Constants\DataMock;
 use Hyn\AgoraRoomService\Token\AccessToken;
+use Hyn\AgoraRoomService\TokenBuilderService;
 use PHPUnit\Framework\TestCase;
 
 
@@ -13,17 +14,24 @@ class TokenBuilderServiceTest extends TestCase
 
     public function test_BuildTokenWithUid_RolePublisher()
     {
+        $token = TokenBuilderService::BuildTokenWithUid(DataMock::AppId, DataMock::AppCertificate, DataMock::ChannelName, DataMock::Uid, TokenBuilderService::RolePublisher, DataMock::Expire);
 
-        $accessToken = new AccessToken(DataMock::AppCertificate, DataMock::AppId, DataMock::Expire, DataMock::IssueTs, DataMock::Salt, []);
-        $token = $accessToken->Build();
-        $this->assertEquals($token, "007eNpTYHhp4iup/VRy+8OdVyYt4hE+3vf/V5rmW92LK2Xu8egdy7qtwGBpbuDsaGyakmpmkGxiYmZimpSUmGqRaGRoamBmmGRsrMK6KTWCiYGBkQEEAFc1Gu8=", '$token');
-
-        $accessToken = AccessToken::CreateAccessToken();
+        $accessToken = AccessToken::NewAccessToken(DataMock::AppId, DataMock::AppCertificate, DataMock::Expire);
         $accessToken->Parse($token);
 
         $this->assertEquals($accessToken->AppId, DataMock::AppId);
-        $this->assertEquals($accessToken->AppId, DataMock::AppId);
         $this->assertEquals($accessToken->Expire, DataMock::Expire);
-        $this->assertEmpty($accessToken->Services);
+
+
+        $this->assertArrayHasKey(AccessToken::ServiceTypeRtc, $accessToken->Services);
+        $this->assertEquals(isset($accessToken->Services[AccessToken::ServiceTypeRtc]), true);
+
+        /**
+         * @var \Hyn\AgoraRoomService\Services\ServiceRtc
+         */
+        $rtcService = $accessToken->Services[AccessToken::ServiceTypeRtc];
+        $this->assertEquals('Hyn\AgoraRoomService\Services\ServiceRtc', get_class($rtcService));
+
+        $this->assertEquals($rtcService->ChannelName, DataMock::ChannelName);
     }
 }

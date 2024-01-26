@@ -118,6 +118,8 @@ function packMapUint32($stream, $map)
             return false;
         }
     }
+
+    return true;
 }
 
 function unPackMapUint32($stream)

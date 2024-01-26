@@ -124,15 +124,17 @@ function unPackMapUint32($stream)
 {
     $bytes_length = fread($stream, BinaryConfig::INT16_BYTES_LENGTH);
     if ($bytes_length === false) {
-        return false;
+        return null;
     }
     $unpacked_length = unPackInt16($bytes_length);
+
     if (!isset($unpacked_length[1])) {
-        return false;
+        return null;
     }
+
     $length = (int) $unpacked_length[1];
     if (!($length > 0)) {
-        return false;
+        return null;
     }
 
 
@@ -140,26 +142,26 @@ function unPackMapUint32($stream)
     for ($i = 0; $i < $length; $i++) {
         $key_bytes   = fread($stream, BinaryConfig::INT16_BYTES_LENGTH);
         if ($key_bytes === false) {
-            return false;
+            return null;
         }
 
         $value_bytes  = fread($stream, BinaryConfig::INT32_BYTES_LENGTH);
         if ($value_bytes === false) {
-            return false;
+            return null;
         }
 
         $unpacked_key        = unPackUint16($key_bytes);
         if ($unpacked_key === false) {
-            return false;
+            return null;
         }
 
         $unpacked_value      = unPackUint32($value_bytes);
         if ($unpacked_value === false) {
-            return false;
+            return null;
         }
 
         if (!isset($unpacked_key[1]) || !isset($unpacked_value[1])) {
-            return false;
+            return null;
         }
         $key = $unpacked_key[1];
         $value = $unpacked_value[1];

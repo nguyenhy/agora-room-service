@@ -5,6 +5,7 @@ namespace Hyn\AgoraRoomService\Token;
 use Exception;
 use Hyn\AgoraRoomService\Functions\BinaryUtils\BinaryConfig;
 use Hyn\AgoraRoomService\Services\PackableServiceInterface;
+use Hyn\AgoraRoomService\Services\ReturnerService;
 use Hyn\AgoraRoomService\Services\Service;
 use Hyn\AgoraRoomService\Services\ServiceRtc;
 
@@ -116,70 +117,71 @@ class AccessToken
         $this->Services[$service->getServiceType()] = $service;
     }
 
-    function Build(): string
+    function Build()
     {
 
+        $returner = new ReturnerService();
+
         if (!self::isUuid($this->AppId)) {
-            throw new Exception("AccessToken.appId");
+            $returner->stop("AccessToken.appId");
         }
 
         if (!self::isUuid($this->AppCert)) {
-            throw new Exception("AccessToken.appCertificate");
+            $returner->stop("AccessToken.appCertificate");
         }
-
 
         $buf = fopen('php://memory', 'r+');
         $packedAppId = packString($buf, $this->AppId);
         if ($packedAppId === false) {
-            throw new Exception("AccessToken.packedAppId", 1);
+            $returner->stop("AccessToken.packedAppId");
         }
 
         $packedIssueTs = packUint32($this->IssueTs);
         if ($packedIssueTs === false) {
-            throw new Exception("AccessToken.packedIssueTs", 1);
+            $returner->stop("AccessToken.packedIssueTs");
         }
 
         $writeIssueTs = fwrite($buf, $packedIssueTs);
         if ($writeIssueTs === false) {
-            throw new Exception("AccessToken.writeIssueTs", 1);
+            $returner->stop("AccessToken.writeIssueTs");
         }
 
 
         $packedExpire = packUint32($this->Expire);
         if ($packedExpire === false) {
-            throw new Exception("AccessToken.packedExpire", 1);
+            $returner->stop("AccessToken.packedExpire");
         }
 
         $writeExpire = fwrite($buf, $packedExpire);
         if ($writeExpire === false) {
-            throw new Exception("AccessToken.writeExpire", 1);
+            $returner->stop("AccessToken.writeExpire");
         }
 
         $packedSalt = packUint32($this->Salt);
         if ($packedSalt === false) {
-            throw new Exception("AccessToken.packedSalt", 1);
+            $returner->stop("AccessToken.packedSalt");
         }
 
         $writeSalt = fwrite($buf, $packedSalt);
         if ($writeSalt === false) {
-            throw new Exception("AccessToken.writeSalt", 1);
+            $returner->stop("AccessToken.writeSalt");
         }
 
         $packedServices = packUint16(count($this->Services));
         if ($packedServices === false) {
-            throw new Exception("AccessToken.packedServices", 1);
+            $returner->stop("AccessToken.packedServices");
         }
 
         $writeServices = fwrite($buf, $packedServices);
         if ($writeServices === false) {
-            throw new Exception("AccessToken.writeServices", 1);
+            $returner->stop("AccessToken.writeServices");
         }
 
 
         // Sign
         $sign = $this->getSign();
         if ($sign === false) {
-            throw new Exception("AccessToken.sign", 1);
+            $returner->stop("AccessToken.sign");
         }
 
         // Pack services in definite order
@@ -191,7 +193,7 @@ class AccessToken
             if ($service) {
                 $packed = $service->Pack($buf);
                 if ($packed === false) {
-                    throw new Exception("AccessToken.Pack", 1);
+                    $returner->stop("AccessToken.Pack");
                 }
             }
         }
@@ -204,7 +206,7 @@ class AccessToken
         rewind($buf);
         $bufBytes = stream_get_contents($buf);
         if ($bufBytes === false) {
-            throw new Exception("AccessToken.bufBytes", 1);
+            $returner->stop("AccessToken.bufBytes");
         }
 
         $hSignContext = hash_init('sha256', HASH_HMAC, $sign);
@@ -217,12 +219,12 @@ class AccessToken
         // }
         $bufContent = fopen('php://memory', 'r+');
         if ($bufContent === false) {
-            throw new Exception("AccessToken.bufContent", 1);
+            $returner->stop("AccessToken.bufContent");
         }
 
         $packedString = packString($bufContent, hex2bin($signature));
         if ($packedString === false) {
-            throw new Exception("AccessToken.packedString", 1);
+            $returner->stop("AccessToken.packedString");
         }
 
         // bufContent.Write(buf.Bytes())
@@ -233,12 +235,12 @@ class AccessToken
         rewind($bufContent);
         $bufContentBytes = stream_get_contents($bufContent);
         if ($bufContentBytes === false) {
-            throw new Exception("AccessToken.bufContentBytesCompressed", 1);
+            $returner->stop("AccessToken.bufContentBytesCompressed");
         }
 
         $bufContentBytesCompressed = compressZlib($bufContentBytes);
         if ($bufContentBytesCompressed === false) {
-            throw new Exception("AccessToken.bufContentBytesCompressed", 1);
+            $returner->stop("AccessToken.bufContentBytesCompressed");
         }
 
         // res = getVersion() + base64EncodeStr(compressZlib(bufContent.Bytes()))
@@ -249,6 +251,7 @@ class AccessToken
 
     function Parse(string $token): bool
     {
+        $returner = new ReturnerService();
 
         // version := token[:VersionLength]
         // if version != getVersion() {
@@ -256,7 +259,7 @@ class AccessToken
         // }
         $version = substr($token, 0, self::VersionLength);
         if ($version != self::getVersion()) {
-            throw new Exception("AccessToken.version", 1);
+            $returner->stop("AccessToken.version");
         }
 
         // var decodeByte []byte
@@ -270,7 +273,7 @@ class AccessToken
         $buffer  = fopen('php://memory', 'r+');
         $bufferWrite = fwrite($buffer, $decodeByteDecompressed);
         if ($bufferWrite === false) {
-            throw new Exception("AccessToken.bufferWrite", 1);
+            $returner->stop("AccessToken.bufferWrite");
         }
 
         // // signature
@@ -281,7 +284,7 @@ class AccessToken
         rewind($buffer);
         $unpackedString = unPackString($buffer);
         if ($unpackedString === false) {
-            throw new Exception("AccessToken.unpackedString", 1);
+            $returner->stop("AccessToken.unpackedString");
         }
 
         // if accessToken.AppId, err = unPackString(buffer); err != nil {
@@ -289,7 +292,7 @@ class AccessToken
         // }
         $unpackedAppId = unPackString($buffer);
         if ($unpackedAppId === false) {
-            throw new Exception("AccessToken.unpackedAppId", 1);
+            $returner->stop("AccessToken.unpackedAppId");
         }
         $this->AppId = $unpackedAppId;
 
@@ -299,13 +302,13 @@ class AccessToken
         // }
         $bytesIssueTs  = fread($buffer, BinaryConfig::INT32_BYTES_LENGTH);
         if ($bytesIssueTs === false) {
-            throw new Exception("AccessToken.BytesIssueTs", 1);
+            $returner->stop("AccessToken.BytesIssueTs");
         }
 
         // rewind($buffer);
         $unpackedIssueTs = unPackUint32($bytesIssueTs);
         if ($unpackedIssueTs === false || !isset($unpackedIssueTs[1])) {
-            throw new Exception("AccessToken.unpackedIssueTs", 1);
+            $returner->stop("AccessToken.unpackedIssueTs");
         }
         $this->IssueTs = (int) $unpackedIssueTs[1];
 
@@ -314,12 +317,12 @@ class AccessToken
         // }
         $bytesExpire  = fread($buffer, BinaryConfig::INT32_BYTES_LENGTH);
         if ($bytesExpire === false) {
-            throw new Exception("AccessToken.bytesExpire", 1);
+            $returner->stop("AccessToken.bytesExpire");
         }
 
         $unpackedExpire = unPackUint32($bytesExpire);
         if ($unpackedExpire === false || !isset($unpackedExpire[1])) {
-            throw new Exception("AccessToken.unpackedExpire", 1);
+            $returner->stop("AccessToken.unpackedExpire");
         }
         $this->Expire = (int) $unpackedExpire[1];
 
@@ -328,12 +331,12 @@ class AccessToken
         // }
         $bytesSalt  = fread($buffer, BinaryConfig::INT32_BYTES_LENGTH);
         if ($bytesSalt === false) {
-            throw new Exception("AccessToken.bytesSalt", 1);
+            $returner->stop("AccessToken.bytesSalt");
         }
 
         $unpackedSalt = unPackUint32($bytesSalt);
         if ($unpackedSalt === false || !isset($unpackedSalt[1])) {
-            throw new Exception("AccessToken.unpackedSalt", 1);
+            $returner->stop("AccessToken.unpackedSalt");
         }
         $this->Salt = (int) $unpackedSalt[1];
 
@@ -344,12 +347,12 @@ class AccessToken
         // }
         $bytesServiceNum  = fread($buffer, BinaryConfig::INT16_BYTES_LENGTH);
         if ($bytesServiceNum === false) {
-            throw new Exception("AccessToken.bytesServiceNum", 1);
+            $returner->stop("AccessToken.bytesServiceNum");
         }
 
         $unpackedServiceNum = unPackUint16($bytesServiceNum);
         if ($unpackedServiceNum === false || !isset($unpackedServiceNum[1])) {
-            throw new Exception("AccessToken.unpackedServiceNum", 1);
+            $returner->stop("AccessToken.unpackedServiceNum");
         }
         $serviceNum = (int) $unpackedServiceNum[1];
 
@@ -415,10 +418,11 @@ class AccessToken
 
     function getSign()
     {
+        $returner = new ReturnerService();
         // bufIssueTs := new(bytes.Buffer)
         $bufIssueTs = fopen('php://memory', 'r+');
         if ($bufIssueTs === false) {
-            throw new Exception("AccessToken.bufIssueTs", 1);
+            $returner->stop("AccessToken.bufIssueTs");
         }
 
         // err = packUint32(bufIssueTs, accessToken.IssueTs)
@@ -428,12 +432,12 @@ class AccessToken
         $packedIssueTs = packUint32($this->IssueTs);
         if ($packedIssueTs === false) {
             fclose($bufIssueTs);
-            throw new Exception("AccessToken.packedIssueTs", 1);
+            $returner->stop("AccessToken.packedIssueTs");
         }
         $writeIssueTs  = fwrite($bufIssueTs, $packedIssueTs);
         if ($writeIssueTs === false) {
             fclose($bufIssueTs);
-            throw new Exception("AccessToken.writeIssueTs", 1);
+            $returner->stop("AccessToken.writeIssueTs");
         }
 
         rewind($bufIssueTs);
@@ -446,7 +450,7 @@ class AccessToken
         $hIssueTs = hash_final($hIssueTsContext);
         if ($hIssueTs === false) {
             fclose($bufIssueTs);
-            throw new Exception("AccessToken.hIssueTs", 1);
+            $returner->stop("AccessToken.hIssueTs");
         }
 
 
@@ -462,13 +466,13 @@ class AccessToken
         if ($packedSalt === false) {
             fclose($bufIssueTs);
             fclose($bufSalt);
-            throw new Exception("AccessToken.packedSalt", 1);
+            $returner->stop("AccessToken.packedSalt");
         }
         $writeSalt = fwrite($bufSalt, $packedSalt);
         if ($writeSalt === false) {
             fclose($bufIssueTs);
             fclose($bufSalt);
-            throw new Exception("AccessToken.writeSalt", 1);
+            $returner->stop("AccessToken.writeSalt");
         }
 
         rewind($bufSalt);

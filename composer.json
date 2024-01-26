@@ -39,6 +39,9 @@
     "scripts": {
         "test": [
             "./vendor/bin/phpunit --testdox"
+        ],
+        "coverage": [
+            "XDEBUG_MODE=coverage ./vendor/bin/phpunit --testdox --coverage-html coverage"
         ]
     },
     "require": {

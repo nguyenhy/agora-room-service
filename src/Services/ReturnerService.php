@@ -25,10 +25,15 @@ class ReturnerService
         $this->task->run();
     }
 
+    /**
+     * @param Exception|string|null $exception
+     * @param int $code
+     * @param Throwable|null $previous
+     */
     public function stop(
-        Exception|string|null $exception = null,
-        int $code = 0,
-        Throwable|null $previous = null
+        $exception = null,
+        $code = 0,
+        $previous = null
     ) {
         $this->run();
         if ($exception) {

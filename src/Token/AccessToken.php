@@ -119,8 +119,12 @@ class AccessToken
     function Build(): string
     {
 
-        if (!self::isUuid($this->AppId) || !self::isUuid($this->AppCert)) {
-            throw new Exception("AccessToken.appId|appCertificate");
+        if (!self::isUuid($this->AppId)) {
+            throw new Exception("AccessToken.appId");
+        }
+
+        if (!self::isUuid($this->AppCert)) {
+            throw new Exception("AccessToken.appCertificate");
         }
 
 

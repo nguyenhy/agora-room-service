@@ -2,9 +2,9 @@
 
 namespace Hyn\AgoraRoomService\Token;
 
+use Exception;
 use Hyn\AgoraRoomService\Functions\BinaryUtils\BinaryConfig;
 use Hyn\AgoraRoomService\Services\PackableServiceInterface;
-use Exception;
 use Hyn\AgoraRoomService\Services\Service;
 use Hyn\AgoraRoomService\Services\ServiceRtc;
 

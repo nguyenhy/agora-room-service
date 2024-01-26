@@ -4,10 +4,7 @@ namespace Hyn\AgoraRoomService\Services;
 
 use Hyn\AgoraRoomService\Token\AccessToken;
 
-use function Hyn\AgoraRoomService\Functions\BinaryUtils\packMapUint32;
 use function Hyn\AgoraRoomService\Functions\BinaryUtils\packString;
-use function Hyn\AgoraRoomService\Functions\BinaryUtils\packUint16;
-use function Hyn\AgoraRoomService\Functions\BinaryUtils\unPackMapUint32;
 use function Hyn\AgoraRoomService\Functions\BinaryUtils\unPackString;
 
 class ServiceRtc implements PackableServiceInterface

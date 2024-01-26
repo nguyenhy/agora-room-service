@@ -4,11 +4,8 @@ namespace Hyn\AgoraRoomServiceTests\Unit\Functions;
 
 use PHPUnit\Framework\TestCase;
 
-use Hyn\AgoraRoomService\Functions\CompressUtils\{
-    function compressZlib,
-    function decompressZlib,
-};
-
+use function Hyn\AgoraRoomService\Functions\CompressUtils\compressZlib;
+use function Hyn\AgoraRoomService\Functions\CompressUtils\decompressZlib;
 
 class CompressUtilsTest extends TestCase
 {

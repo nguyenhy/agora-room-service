@@ -4,19 +4,17 @@ namespace Hyn\AgoraRoomServiceTests\Unit\Functions;
 
 use PHPUnit\Framework\TestCase;
 
-use  Hyn\AgoraRoomService\Functions\BinaryUtils\{
-    BinaryConfig,
-    function packUint16,
-    function packUint32,
-    function packInt16,
-    function packMapUint32,
-    function packString,
-    function unPackInt16,
-    function unPackMapUint32,
-    function unPackString,
-    function unPackUint16,
-    function unPackUint32,
-};
+use Hyn\AgoraRoomService\Functions\BinaryUtils\BinaryConfig;
+use function Hyn\AgoraRoomService\Functions\BinaryUtils\packUint16;
+use function Hyn\AgoraRoomService\Functions\BinaryUtils\packUint32;
+use function Hyn\AgoraRoomService\Functions\BinaryUtils\packInt16;
+use function Hyn\AgoraRoomService\Functions\BinaryUtils\packMapUint32;
+use function Hyn\AgoraRoomService\Functions\BinaryUtils\packString;
+use function Hyn\AgoraRoomService\Functions\BinaryUtils\unPackInt16;
+use function Hyn\AgoraRoomService\Functions\BinaryUtils\unPackMapUint32;
+use function Hyn\AgoraRoomService\Functions\BinaryUtils\unPackString;
+use function Hyn\AgoraRoomService\Functions\BinaryUtils\unPackUint16;
+use function Hyn\AgoraRoomService\Functions\BinaryUtils\unPackUint32;
 
 class BinaryUtilsTest extends TestCase
 {

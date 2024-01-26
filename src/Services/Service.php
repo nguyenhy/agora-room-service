@@ -3,10 +3,12 @@
 namespace Hyn\AgoraRoomService\Services;
 
 use Exception;
+use Hyn\AgoraRoomService\Functions\BinaryUtils\BinaryConfig;
 
 use function Hyn\AgoraRoomService\Functions\BinaryUtils\packMapUint32;
 use function Hyn\AgoraRoomService\Functions\BinaryUtils\packUint16;
 use function Hyn\AgoraRoomService\Functions\BinaryUtils\unPackMapUint32;
+use function Hyn\AgoraRoomService\Functions\BinaryUtils\unPackUint16;
 
 class Service  implements PackableServiceInterface
 {
@@ -25,7 +27,7 @@ class Service  implements PackableServiceInterface
 
     public static function NewService(int $serviceType): Service
     {
-        return new  Service([],  $serviceType);
+        return new Service([], $serviceType);
     }
 
     function AddPrivilege(int $privilege, int $expire)
@@ -49,20 +51,56 @@ class Service  implements PackableServiceInterface
 
     function UnPack($stream): void
     {
-        $map = unPackMapUint32($stream);
-        if ($map === false) {
-            throw new Exception("UnPack.unPackMapUint32");
-        }
-        $this->Privileges = $map;
+        $this->unPackType($stream);
+        $this->unPackPrivileges($stream);
     }
 
     function packPrivileges($stream)
     {
-        return packMapUint32($stream, $this->Privileges);
+        $packed = packMapUint32($stream, $this->Privileges);
+        if ($packed === false) {
+            throw new Exception("packPrivileges.packMapUint32");
+        }
+
+        return $packed;
+    }
+
+    function unPackPrivileges($stream)
+    {
+        $unpacked = unpackMapUint32($stream);
+        if (!is_array($unpacked)) {
+            throw new Exception("packPrivileges.packMapUint32");
+        }
+        $this->Privileges = $unpacked;
     }
 
     function packType($stream)
     {
-        return packUint16($stream, $this->Type);
+        $packed =  packUint16($this->Type);
+        if ($packed === false) {
+            throw new Exception("packType.packUint16");
+        }
+
+        $write = fwrite($stream, $packed);
+        if ($write === false) {
+            throw new Exception("packType.fwrite");
+        }
+
+        return $write;
+    }
+
+    function unPackType($stream)
+    {
+        $read = fread($stream, BinaryConfig::INT16_BYTES_LENGTH);
+        if ($read === false) {
+            throw new Exception("unPackType.fread");
+        }
+
+        $unpacked =  unPackUint16($read);
+        if ($unpacked === false || !isset($unpacked[1])) {
+            throw new Exception("unPackType.unPackUint16");
+        }
+
+        $this->Type = $unpacked[1];
     }
 }

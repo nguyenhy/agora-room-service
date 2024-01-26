@@ -72,7 +72,7 @@ class AccessToken
          * map[uint16]IService
          * @var array<int,IService>
          */
-        array $Services,
+        array $Services
     ) {
         $this->AppCert = $AppCert;
         $this->AppId = $AppId;

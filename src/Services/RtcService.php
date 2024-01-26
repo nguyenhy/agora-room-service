@@ -28,6 +28,13 @@ class ServiceRtc implements PackableServiceInterface
         return new ServiceRtc($channelName, $uid, Service::NewService(AccessToken::ServiceTypeRtc));
     }
 
+    /**
+     * pack orders
+     * - Type
+     * - Privileges
+     * - ChannelName
+     * - Uid
+     */
     function Pack($stream): void
     {
         $this->Service->Pack($stream);
@@ -35,6 +42,13 @@ class ServiceRtc implements PackableServiceInterface
         packString($stream, $this->Uid);
     }
 
+    /**
+     * unpack orders
+     * - Type
+     * - Privileges
+     * - ChannelName
+     * - Uid
+     */
     function UnPack($stream): void
     {
         $this->Service->UnPack($stream);

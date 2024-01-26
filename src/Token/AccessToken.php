@@ -82,7 +82,7 @@ class AccessToken
         $this->Services = $Services;
     }
 
-    static public function NewAccessToken(string $appId, string $appCert, int  $expire): AccessToken
+    static public function NewAccessToken(string $appId, string $appCert, int $expire): AccessToken
     {
         // Get the current Unix timestamp in seconds
         $issueTs = (int)time();
@@ -92,9 +92,10 @@ class AccessToken
 
         return new AccessToken($appCert, $appId, $expire, $issueTs, $salt, []);
     }
-    static function CreateAccessToken(): AccessToken
+
+    static function CreateAccessToken(string $appId = "", string $appCert = "", int  $expire = 900): AccessToken
     {
-        return self::NewAccessToken("", "", 900);
+        return self::NewAccessToken($appId, $appCert, $expire);
     }
 
     static function isUuid(string $s): bool

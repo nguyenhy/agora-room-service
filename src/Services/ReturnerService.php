@@ -20,12 +20,17 @@ class ReturnerService
         return $this->task->add($method);
     }
 
+    public function run(): void
+    {
+        $this->task->run();
+    }
+
     public function stop(
         Exception|string|null $exception = null,
         int $code = 0,
         Throwable|null $previous = null
     ) {
-        $this->task->run();
+        $this->run();
         if ($exception) {
             if ($exception instanceof \Exception) {
                 throw $exception;

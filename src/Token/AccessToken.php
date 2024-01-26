@@ -131,6 +131,14 @@ class AccessToken
         }
 
         $buf = fopen('php://memory', 'r+');
+        if ($buf === false) {
+            return $returner->stop('AccessToken.packedAppId');
+        }
+
+        $returner->add(function () use ($buf) {
+            fclose($buf);
+        });
+
         $packedAppId = packString($buf, $this->AppId);
         if ($packedAppId === false) {
             $returner->stop("AccessToken.packedAppId");
@@ -221,6 +229,9 @@ class AccessToken
         if ($bufContent === false) {
             $returner->stop("AccessToken.bufContent");
         }
+        $returner->add(function () use ($bufContent) {
+            fclose($bufContent);
+        });
 
         $packedString = packString($bufContent, hex2bin($signature));
         if ($packedString === false) {
@@ -245,6 +256,8 @@ class AccessToken
 
         // res = getVersion() + base64EncodeStr(compressZlib(bufContent.Bytes()))
         $res = self::getVersion() . base64EncodeStr($bufContentBytesCompressed);
+
+        $returner->run();
 
         return $res;
     }
@@ -271,6 +284,13 @@ class AccessToken
 
         // buffer := bytes.NewReader(decompressZlib(decodeByte))
         $buffer  = fopen('php://memory', 'r+');
+        if ($buffer === false) {
+            $returner->stop("AccessToken.bufContent");
+        }
+        $returner->add(function () use ($buffer) {
+            fclose($buffer);
+        });
+
         $bufferWrite = fwrite($buffer, $decodeByteDecompressed);
         if ($bufferWrite === false) {
             $returner->stop("AccessToken.bufferWrite");
@@ -412,6 +432,9 @@ class AccessToken
         }
         // }
 
+
+        $returner->run();
+
         // return true, nil
         return true;
     }
@@ -424,6 +447,9 @@ class AccessToken
         if ($bufIssueTs === false) {
             $returner->stop("AccessToken.bufIssueTs");
         }
+        $returner->add(function () use ($bufIssueTs) {
+            fclose($bufIssueTs);
+        });
 
         // err = packUint32(bufIssueTs, accessToken.IssueTs)
         // if err != nil {
@@ -431,12 +457,10 @@ class AccessToken
         // }
         $packedIssueTs = packUint32($this->IssueTs);
         if ($packedIssueTs === false) {
-            fclose($bufIssueTs);
             $returner->stop("AccessToken.packedIssueTs");
         }
         $writeIssueTs  = fwrite($bufIssueTs, $packedIssueTs);
         if ($writeIssueTs === false) {
-            fclose($bufIssueTs);
             $returner->stop("AccessToken.writeIssueTs");
         }
 
@@ -449,7 +473,6 @@ class AccessToken
         hash_update($hIssueTsContext, $this->AppCert);
         $hIssueTs = hash_final($hIssueTsContext);
         if ($hIssueTs === false) {
-            fclose($bufIssueTs);
             $returner->stop("AccessToken.hIssueTs");
         }
 
@@ -457,6 +480,12 @@ class AccessToken
         // // Salt
         // $bufSalt = new(bytes.Buffer)
         $bufSalt = fopen('php://memory', 'r+');
+        if ($bufSalt === false) {
+            $returner->stop("AccessToken.bufContent");
+        }
+        $returner->add(function () use ($bufSalt) {
+            fclose($bufSalt);
+        });
 
         // err = packUint32(bufSalt, accessToken.Salt)
         // if err != nil {
@@ -464,14 +493,10 @@ class AccessToken
         // }
         $packedSalt = packUint32($this->Salt);
         if ($packedSalt === false) {
-            fclose($bufIssueTs);
-            fclose($bufSalt);
             $returner->stop("AccessToken.packedSalt");
         }
         $writeSalt = fwrite($bufSalt, $packedSalt);
         if ($writeSalt === false) {
-            fclose($bufIssueTs);
-            fclose($bufSalt);
             $returner->stop("AccessToken.writeSalt");
         }
 
@@ -484,8 +509,7 @@ class AccessToken
         hash_update($hSaltContext, hex2bin($hIssueTs));
         $hSalt = hash_final($hSaltContext);
 
-        fclose($bufIssueTs);
-        fclose($bufSalt);
+        $returner->run();
 
         return hex2bin($hSalt);
     }
